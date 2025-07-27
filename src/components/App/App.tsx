@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDebounce } from "use-debounce";
 import { useNotesQuery } from "../../hooks/useNotesQuery";
 import { useDeleteNoteMutation } from "../../hooks/useDeleteNoteMutation";
@@ -15,15 +15,19 @@ const App = () => {
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const deleteMutation = useDeleteNoteMutation();
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
+
   const { data, isLoading, isError } = useNotesQuery({
     page,
     search: debouncedSearch.trim() !== "" ? debouncedSearch : undefined,
   });
 
-  const deleteMutation = useDeleteNoteMutation();
-
-  const handleDeleteNote = (id: string) => {
-    deleteMutation.mutate(id);
+  const handleDeleteNote = (id: number) => {
+    deleteMutation.mutate(String(id)); // 🟢 Приводимо id до рядка
   };
 
   return (
@@ -41,13 +45,13 @@ const App = () => {
       {isLoading && <p>Завантаження...</p>}
       {isError && <p>Помилка при завантаженні нотаток</p>}
 
-      {data?.results && (
+      {data?.notes && (
         <>
-          <NoteList notes={data.results} onDelete={handleDeleteNote} />
+          <NoteList notes={data.notes} onDelete={handleDeleteNote} />
 
-          {data.total > 12 && (
+          {data.totalPages > 1 && (
             <Pagination
-              pageCount={Math.ceil(data.total / 12)}
+              pageCount={data.totalPages}
               currentPage={page}
               onPageChange={setPage}
             />

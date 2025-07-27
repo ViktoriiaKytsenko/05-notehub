@@ -1,12 +1,13 @@
 import { useEffect } from "react";
+import ReactDOM from "react-dom";
 import styles from "./Modal.module.css";
 
 interface ModalProps {
-  onClose: () => void;
   children: React.ReactNode;
+  onClose: () => void;
 }
 
-const Modal = ({ onClose, children }: ModalProps) => {
+const Modal = ({ children, onClose }: ModalProps) => {
   // Закриття по Esc
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -15,26 +16,31 @@ const Modal = ({ onClose, children }: ModalProps) => {
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    document.body.style.overflow = "hidden"; // Заборона скролу
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = ""; // Відновлення скролу
+    };
   }, [onClose]);
 
-  // Закриття по кліку на backdrop
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
 
-  return (
-    <div className={styles.backdrop} onClick={handleBackdropClick}>
-      <div className={styles.modal}>
-        <button className={styles.closeButton} onClick={onClose}>
-          ✕
-        </button>
-        {children}
-      </div>
-    </div>
+  return ReactDOM.createPortal(
+    <div
+      className={styles.backdrop}
+      role="dialog"
+      aria-modal="true"
+      onClick={handleBackdropClick}
+    >
+      <div className={styles.modal}>{children}</div>
+    </div>,
+    document.getElementById("modal-root") as HTMLElement
   );
 };
 

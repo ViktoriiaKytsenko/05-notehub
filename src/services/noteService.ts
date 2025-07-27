@@ -1,6 +1,5 @@
-import type { AxiosResponse } from "axios";
-import type { Note } from "../types/note";
 import axios from "axios";
+import type { Note } from "../types/note";
 
 const BASE_URL = "https://notehub-public.goit.study/api";
 const TOKEN = import.meta.env.VITE_NOTEHUB_TOKEN;
@@ -12,44 +11,35 @@ const api = axios.create({
   },
 });
 
-// Типи параметрів і відповіді для fetchNotes
 export interface FetchNotesParams {
   page?: number;
   search?: string;
 }
 
 export interface FetchNotesResponse {
-  results: Note[];
-  total: number;
-  page: number;
-  limit: number;
+  notes: Note[];
+  totalPages: number;
 }
 
-// Запит на отримання нотаток
 export const fetchNotes = async (
   params: FetchNotesParams
 ): Promise<FetchNotesResponse> => {
-  const response: AxiosResponse<FetchNotesResponse> = await api.get("/notes", {
+  const response = await api.get<FetchNotesResponse>("/notes", {
     params,
   });
   return response.data;
 };
 
-// Тип даних для створення нової нотатки
-export interface CreateNoteDto {
+export const createNote = async (data: {
   title: string;
-  content: string;
-  tag: string;
-}
-
-// Створення нотатки
-export const createNote = async (data: CreateNoteDto): Promise<Note> => {
-  const response: AxiosResponse<Note> = await api.post("/notes", data);
+  content?: string;
+  tag: Note["tag"];
+}): Promise<Note> => {
+  const response = await api.post<Note>("/notes", data);
   return response.data;
 };
 
-// Видалення нотатки
-export const deleteNote = async (id: string): Promise<Note> => {
-  const response: AxiosResponse<Note> = await api.delete(`/notes/${id}`);
+export const deleteNote = async (id: number): Promise<Note> => {
+  const response = await api.delete<Note>(`/notes/${id}`);
   return response.data;
 };

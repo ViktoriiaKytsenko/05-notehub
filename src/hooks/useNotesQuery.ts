@@ -10,10 +10,8 @@ export const useNotesQuery = (params: FetchNotesParams) => {
     queryKey: ["notes", params],
     queryFn: () => fetchNotes(params),
     placeholderData: () => ({
-      results: [],
-      total: 0,
-      page: params.page ?? 1,
-      limit: 12,
+      notes: [],
+      totalPages: 1,
     }),
   });
 };
