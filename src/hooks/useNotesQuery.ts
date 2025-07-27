@@ -12,7 +12,7 @@ export const useNotesQuery = (params: FetchNotesParams) => {
     placeholderData: () => ({
       results: [],
       total: 0,
-      page: params.page ?? 1, // ← надаємо дефолтне значення, якщо undefined
+      page: params.page ?? 1,
       limit: 12,
     }),
   });

@@ -7,7 +7,7 @@ export interface Note {
   tags?: NoteTag[];
 }
 
-// Тип для тегів (може бути використано пізніше)
+// Тип для тегів
 export interface NoteTag {
   id: string;
   name: string;
