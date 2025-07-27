@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDebounce } from "use-debounce";
 import { useNotesQuery } from "../../hooks/useNotesQuery";
-import { useDeleteNoteMutation } from "../../hooks/useDeleteNoteMutation";
 import NoteList from "../NoteList/NoteList";
 import Pagination from "../Pagination/Pagination";
 import SearchBox from "../SearchBox/SearchBox";
@@ -15,8 +14,6 @@ const App = () => {
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const deleteMutation = useDeleteNoteMutation();
-
   useEffect(() => {
     setPage(1);
   }, [debouncedSearch]);
@@ -25,10 +22,6 @@ const App = () => {
     page,
     search: debouncedSearch.trim() !== "" ? debouncedSearch : undefined,
   });
-
-  const handleDeleteNote = (id: number) => {
-    deleteMutation.mutate(id); // ✅ Тепер передаємо число, як очікує хук
-  };
 
   return (
     <div className={styles.app}>
@@ -47,8 +40,7 @@ const App = () => {
 
       {data?.notes && (
         <>
-          <NoteList notes={data.notes} onDelete={handleDeleteNote} />
-
+          <NoteList notes={data.notes} /> {/* 🟢 без onDelete */}
           {data.totalPages > 1 && (
             <Pagination
               pageCount={data.totalPages}
