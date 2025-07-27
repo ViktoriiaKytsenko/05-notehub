@@ -27,7 +27,7 @@ const App = () => {
   });
 
   const handleDeleteNote = (id: number) => {
-    deleteMutation.mutate(String(id)); // 🟢 Приводимо id до рядка
+    deleteMutation.mutate(id); // ✅ Тепер передаємо число, як очікує хук
   };
 
   return (

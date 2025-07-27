@@ -5,8 +5,8 @@ import type { Note } from "../types/note";
 export const useDeleteNoteMutation = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<Note, Error, string>({
-    mutationFn: deleteNote,
+  return useMutation<Note, Error, number>({
+    mutationFn: (id: number) => deleteNote(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
     },
