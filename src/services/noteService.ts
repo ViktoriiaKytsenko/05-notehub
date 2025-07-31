@@ -12,9 +12,10 @@ const api = axios.create({
   },
 });
 
-// Типи параметрів для отримання нотаток
+// Типи параметрів
 export interface FetchNotesParams {
   page?: number;
+  perPage?: number;
   search?: string;
 }
 
@@ -23,11 +24,17 @@ export interface FetchNotesResponse {
   totalPages: number;
 }
 
-// Отримання списку нотаток
+// Отримання нотаток
 export const fetchNotes = async (
   params: FetchNotesParams
 ): Promise<FetchNotesResponse> => {
-  const response = await api.get<FetchNotesResponse>("/notes", { params });
+  const response = await api.get<FetchNotesResponse>("/notes", {
+    params: {
+      ...params,
+      perPage: 12, // ✅ правильно!
+    },
+  });
+
   return response.data;
 };
 

@@ -27,10 +27,7 @@ const App = () => {
     <div className={styles.app}>
       <header className={styles.toolbar}>
         <SearchBox value={search} onChange={setSearch} />
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className={styles.createButton}
-        >
+        <button onClick={() => setIsModalOpen(true)} className={styles.button}>
           Створити нотатку
         </button>
       </header>
@@ -40,7 +37,7 @@ const App = () => {
 
       {data?.notes && (
         <>
-          <NoteList notes={data.notes} /> {/* 🟢 без onDelete */}
+          <NoteList notes={data.notes} /> {}
           {data.totalPages > 1 && (
             <Pagination
               pageCount={data.totalPages}
@@ -53,7 +50,7 @@ const App = () => {
 
       {isModalOpen && (
         <Modal onClose={() => setIsModalOpen(false)}>
-          <NoteForm onSuccess={() => setIsModalOpen(false)} />
+          <NoteForm onCancel={() => setIsModalOpen(false)} />
         </Modal>
       )}
     </div>

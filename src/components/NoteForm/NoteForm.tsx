@@ -1,28 +1,44 @@
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { useCreateNoteMutation } from "../../hooks/useCreateNoteMutation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createNote } from "../../services/noteService";
+import type { NoteTag } from "../../types/note";
 import styles from "./NoteForm.module.css";
 
 const NoteSchema = Yup.object().shape({
-  title: Yup.string().required("Обов’язкове поле"),
-  content: Yup.string().required("Обов’язкове поле"),
+  title: Yup.string()
+    .min(3, "Мінімум 3 символи")
+    .max(50, "Максимум 50 символів")
+    .required("Обов’язкове поле"),
+  content: Yup.string().max(500, "Максимум 500 символів"),
   tag: Yup.string()
-    .oneOf(["Personal", "Work", "Todo"], "Неправильний тег")
+    .oneOf(
+      ["Personal", "Work", "Todo", "Meeting", "Shopping"],
+      "Неправильний тег"
+    )
     .required("Оберіть тег"),
 });
 
 interface FormValues {
   title: string;
   content: string;
-  tag: "Personal" | "Work" | "Todo";
+  tag: NoteTag;
 }
 
 interface NoteFormProps {
-  onSuccess: () => void;
+  onCancel: () => void;
 }
 
-const NoteForm = ({ onSuccess }: NoteFormProps) => {
-  const mutation = useCreateNoteMutation();
+const NoteForm = ({ onCancel }: NoteFormProps) => {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: createNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      onCancel(); // закриває модалку
+    },
+  });
 
   const initialValues: FormValues = {
     title: "",
@@ -31,7 +47,7 @@ const NoteForm = ({ onSuccess }: NoteFormProps) => {
   };
 
   const handleSubmit = (values: FormValues) => {
-    mutation.mutate(values, { onSuccess });
+    mutation.mutate(values);
   };
 
   return (
@@ -41,35 +57,55 @@ const NoteForm = ({ onSuccess }: NoteFormProps) => {
       onSubmit={handleSubmit}
     >
       <Form className={styles.form}>
-        <label>
-          Заголовок:
-          <Field name="title" />
+        <div className={styles.formGroup}>
+          <label htmlFor="title">Заголовок:</label>
+          <Field name="title" className={styles.input} />
           <ErrorMessage name="title" component="div" className={styles.error} />
-        </label>
+        </div>
 
-        <label>
-          Контент:
-          <Field name="content" as="textarea" />
+        <div className={styles.formGroup}>
+          <label htmlFor="content">Контент:</label>
+          <Field
+            name="content"
+            as="textarea"
+            className={styles.textarea}
+            rows={6}
+          />
           <ErrorMessage
             name="content"
             component="div"
             className={styles.error}
           />
-        </label>
+        </div>
 
-        <label>
-          Тег:
-          <Field name="tag" as="select">
-            <option value="Personal">Personal</option>
-            <option value="Work">Work</option>
+        <div className={styles.formGroup}>
+          <label htmlFor="tag">Тег:</label>
+          <Field name="tag" as="select" className={styles.select}>
             <option value="Todo">Todo</option>
+            <option value="Work">Work</option>
+            <option value="Personal">Personal</option>
+            <option value="Meeting">Meeting</option>
+            <option value="Shopping">Shopping</option>
           </Field>
           <ErrorMessage name="tag" component="div" className={styles.error} />
-        </label>
+        </div>
 
-        <button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? "Завантаження..." : "Створити"}
-        </button>
+        <div className={styles.actions}>
+          <button
+            type="button"
+            className={styles.cancelButton}
+            onClick={onCancel}
+          >
+            Скасувати
+          </button>
+          <button
+            type="submit"
+            className={styles.submitButton}
+            disabled={mutation.isPending}
+          >
+            {mutation.isPending ? "Завантаження..." : "Створити"}
+          </button>
+        </div>
       </Form>
     </Formik>
   );
